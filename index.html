@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apromo — Your Programming Journey Starts Here</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  /* ─── RESET & VARIABLES ─── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:         #050810;
+    --bg2:        #080d1a;
+    --surface:    rgba(255,255,255,0.04);
+    --surface2:   rgba(255,255,255,0.07);
+    --border:     rgba(255,255,255,0.08);
+    --accent1:    #4f8eff;
+    --accent2:    #a259ff;
+    --accent3:    #00e5c3;
+    --text:       #e8eeff;
+    --muted:      #7a85a8;
+    --grad:       linear-gradient(135deg, var(--accent1), var(--accent2));
+    --grad2:      linear-gradient(135deg, var(--accent2), var(--accent3));
+    --font-head:  'Syne', sans-serif;
+    --font-body:  'DM Sans', sans-serif;
+    --r:          16px;
+    --r2:         24px;
+    --tr:         0.35s cubic-bezier(.4,0,.2,1);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ─── LOADER ─── */
+  #loader {
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 20px;
+    transition: opacity .6s ease, visibility .6s ease;
+  }
+  #loader.done { opacity: 0; visibility: hidden; }
+  .loader-logo { font-family: var(--font-head); font-size: 2rem; font-weight: 800;
+    background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .loader-bar { width: 160px; height: 3px; background: var(--border); border-radius: 99px; overflow: hidden; }
+  .loader-fill { height: 100%; border-radius: 99px; background: var(--grad); width: 0;
+    animation: fill 1.4s ease forwards; }
+  @keyframes fill { to { width: 100%; } }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg2); }
+  ::-webkit-scrollbar-thumb { background: var(--accent1); border-radius: 99px; }
+
+  /* ─── NOISE OVERLAY ─── */
+  body::before {
+    content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: .35;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 20px 6%;
+    display: flex; align-items: center; justify-content: space-between;
+    transition: background var(--tr), box-shadow var(--tr), padding var(--tr);
+  }
+  nav.scrolled {
+    background: rgba(5,8,16,.85);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 1px 0 var(--border);
+    padding: 14px 6%;
+  }
+  .nav-logo { font-family: var(--font-head); font-weight: 800; font-size: 1.5rem;
+    background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .nav-links { display: flex; gap: 36px; list-style: none; }
+  .nav-links a { color: var(--muted); text-decoration: none; font-weight: 500;
+    font-size: .9rem; letter-spacing: .03em; transition: color var(--tr); }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta { padding: 10px 22px; border-radius: 99px; background: var(--grad);
+    color: #fff; font-family: var(--font-head); font-weight: 700; font-size: .88rem;
+    text-decoration: none; letter-spacing: .04em; transition: opacity var(--tr), transform var(--tr);
+    box-shadow: 0 0 24px rgba(79,142,255,.35); }
+  .nav-cta:hover { opacity: .88; transform: translateY(-1px); }
+  .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+  .hamburger span { width: 24px; height: 2px; background: var(--text); border-radius: 2px; transition: var(--tr); }
+
+  /* ─── HERO ─── */
+  #hero {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 120px 6% 80px;
+    position: relative; overflow: hidden;
+  }
+  .hero-grid-bg {
+    position: absolute; inset: 0; z-index: 0;
+    background-image:
+      linear-gradient(rgba(79,142,255,.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(79,142,255,.06) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 100%);
+  }
+  .hero-blob {
+    position: absolute; border-radius: 50%; filter: blur(80px); pointer-events: none;
+  }
+  .blob1 { width: 500px; height: 500px; background: rgba(79,142,255,.12); top:-10%; left:-5%; }
+  .blob2 { width: 400px; height: 400px; background: rgba(162,89,255,.12); bottom: 0; right: 5%; }
+  .blob3 { width: 300px; height: 300px; background: rgba(0,229,195,.08); top: 40%; left: 40%; }
+
+  .hero-inner {
+    position: relative; z-index: 1;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+    max-width: 1200px; width: 100%;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 99px; padding: 7px 16px; font-size: .8rem; font-weight: 500;
+    color: var(--accent3); margin-bottom: 24px;
+    animation: fadeUp .8s ease both;
+  }
+  .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent3);
+    box-shadow: 0 0 8px var(--accent3); animation: pulse 2s ease infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
+
+  .hero-title {
+    font-family: var(--font-head); font-weight: 800;
+    font-size: clamp(2.4rem, 5vw, 3.8rem);
+    line-height: 1.1; letter-spacing: -.02em;
+    animation: fadeUp .8s .15s ease both;
+  }
+  .hero-title .grad-text {
+    background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .hero-sub {
+    color: var(--muted); font-size: 1.05rem; margin: 20px 0 36px; max-width: 460px;
+    animation: fadeUp .8s .3s ease both;
+  }
+  .hero-actions {
+    display: flex; gap: 14px; flex-wrap: wrap;
+    animation: fadeUp .8s .45s ease both;
+  }
+  .btn-primary {
+    padding: 14px 30px; border-radius: 99px; background: var(--grad);
+    color: #fff; font-family: var(--font-head); font-weight: 700; font-size: .95rem;
+    text-decoration: none; letter-spacing: .03em;
+    box-shadow: 0 4px 30px rgba(79,142,255,.4);
+    transition: transform var(--tr), box-shadow var(--tr);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 40px rgba(79,142,255,.55); }
+  .btn-ghost {
+    padding: 14px 30px; border-radius: 99px;
+    border: 1px solid var(--border); color: var(--text);
+    font-family: var(--font-head); font-weight: 600; font-size: .95rem;
+    text-decoration: none; background: var(--surface);
+    transition: background var(--tr), border-color var(--tr), transform var(--tr);
+  }
+  .btn-ghost:hover { background: var(--surface2); border-color: rgba(255,255,255,.18); transform: translateY(-2px); }
+
+  /* hero visual */
+  .hero-visual {
+    position: relative; animation: fadeUp .9s .2s ease both;
+  }
+  .code-window {
+    background: rgba(10,14,30,.9);
+    border: 1px solid var(--border);
+    border-radius: var(--r2);
+    overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.06);
+    backdrop-filter: blur(10px);
+  }
+  .code-bar {
+    display: flex; align-items: center; gap: 8px; padding: 14px 18px;
+    border-bottom: 1px solid var(--border); background: rgba(255,255,255,.02);
+  }
+  .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .dot.r { background: #ff5f57; } .dot.y { background: #ffbd2e; } .dot.g { background: #28ca42; }
+  .code-tab { margin-left: 12px; font-size: .78rem; color: var(--muted);
+    background: var(--surface); border-radius: 6px; padding: 3px 10px; }
+  .code-body { padding: 22px 24px; font-family: 'Courier New', monospace; font-size: .82rem; line-height: 1.8; }
+  .c-comment { color: #4a5568; }
+  .c-keyword { color: var(--accent2); }
+  .c-fn { color: var(--accent1); }
+  .c-str { color: var(--accent3); }
+  .c-num { color: #f6ad55; }
+  .c-var { color: var(--text); }
+  .cursor { display: inline-block; width: 2px; height: 1em; background: var(--accent1);
+    vertical-align: text-bottom; animation: blink 1s step-end infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  .hero-stats {
+    display: flex; gap: 16px; margin-top: 20px;
+  }
+  .stat-pill {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--r);
+    padding: 14px 20px; flex: 1; text-align: center;
+    backdrop-filter: blur(10px); transition: background var(--tr), transform var(--tr);
+  }
+  .stat-pill:hover { background: var(--surface2); transform: translateY(-3px); }
+  .stat-num { font-family: var(--font-head); font-weight: 800; font-size: 1.6rem;
+    background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .stat-label { font-size: .78rem; color: var(--muted); }
+
+  /* ─── SECTION COMMONS ─── */
+  section { position: relative; z-index: 1; padding: 100px 6%; }
+  .section-tag {
+    display: inline-block; font-size: .78rem; font-weight: 600; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--accent1); margin-bottom: 16px;
+  }
+  .section-title {
+    font-family: var(--font-head); font-weight: 800;
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem); line-height: 1.15; letter-spacing: -.02em;
+    margin-bottom: 16px;
+  }
+  .section-sub { color: var(--muted); max-width: 520px; font-size: 1rem; margin-bottom: 60px; }
+  .center { text-align: center; }
+  .center .section-sub { margin-left: auto; margin-right: auto; }
+  .max-w { max-width: 1200px; margin: 0 auto; }
+
+  /* REVEAL ANIMATION */
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity .7s ease, transform .7s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+
+  /* ─── ABOUT ─── */
+  #about { background: var(--bg2); }
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+  .about-visual {
+    position: relative;
+  }
+  .about-card-stack { position: relative; height: 340px; }
+  .a-card {
+    position: absolute; background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--r2);
+    padding: 22px 24px; backdrop-filter: blur(12px);
+    transition: transform var(--tr);
+  }
+  .a-card:nth-child(1) { bottom: 0; left: 0; width: 260px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.4); transform: rotate(-3deg); }
+  .a-card:nth-child(2) { top: 0; right: 0; width: 240px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.4); transform: rotate(2deg); }
+  .a-card:nth-child(3) { top: 50%; left: 50%; transform: translate(-50%,-50%) rotate(0deg);
+    width: 220px; box-shadow: 0 30px 80px rgba(79,142,255,.2);
+    border-color: rgba(79,142,255,.25); }
+  .about-card-stack:hover .a-card:nth-child(1) { transform: rotate(-6deg) translateY(4px); }
+  .about-card-stack:hover .a-card:nth-child(2) { transform: rotate(5deg) translateY(-4px); }
+  .a-icon { font-size: 1.8rem; margin-bottom: 10px; }
+  .a-card-title { font-family: var(--font-head); font-weight: 700; font-size: .95rem; margin-bottom: 5px; }
+  .a-card-text { font-size: .8rem; color: var(--muted); }
+  .about-text .section-sub { margin-bottom: 32px; }
+  .about-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+  .about-list li { display: flex; align-items: flex-start; gap: 12px; font-size: .95rem; color: var(--muted); }
+  .about-list li::before {
+    content: ''; flex-shrink: 0; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--grad); margin-top: 3px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .about-list li span { color: var(--text); }
+
+  /* ─── SERVICES ─── */
+  .services-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+  }
+  .service-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r2); padding: 32px;
+    transition: background var(--tr), border-color var(--tr), transform var(--tr), box-shadow var(--tr);
+    cursor: default; position: relative; overflow: hidden;
+  }
+  .service-card::before {
+    content: ''; position: absolute; inset: 0; border-radius: var(--r2);
+    opacity: 0; transition: opacity var(--tr);
+    background: linear-gradient(135deg, rgba(79,142,255,.06), rgba(162,89,255,.06));
+  }
+  .service-card:hover { background: var(--surface2); border-color: rgba(79,142,255,.3);
+    transform: translateY(-5px); box-shadow: 0 20px 60px rgba(79,142,255,.12); }
+  .service-card:hover::before { opacity: 1; }
+  .svc-icon {
+    width: 52px; height: 52px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; margin-bottom: 20px;
+    background: var(--grad);
+    box-shadow: 0 8px 24px rgba(79,142,255,.3);
+  }
+  .svc-title { font-family: var(--font-head); font-weight: 700; font-size: 1.1rem; margin-bottom: 10px; }
+  .svc-desc { color: var(--muted); font-size: .9rem; line-height: 1.65; }
+  .svc-arrow {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--accent1); font-size: .85rem; font-weight: 600; margin-top: 20px;
+    opacity: 0; transform: translateX(-6px); transition: opacity var(--tr), transform var(--tr);
+  }
+  .service-card:hover .svc-arrow { opacity: 1; transform: translateX(0); }
+
+  /* ─── HOW IT WORKS ─── */
+  #how { background: var(--bg2); }
+  .steps-track {
+    position: relative; display: grid;
+    grid-template-columns: repeat(4, 1fr); gap: 0; margin-top: 60px;
+  }
+  .steps-track::before {
+    content: ''; position: absolute; top: 36px; left: 12.5%; right: 12.5%; height: 2px;
+    background: linear-gradient(90deg, var(--accent1), var(--accent2), var(--accent3));
+    z-index: 0; border-radius: 2px;
+  }
+  .step {
+    text-align: center; padding: 0 16px; position: relative; z-index: 1;
+  }
+  .step-num {
+    width: 72px; height: 72px; border-radius: 50%; margin: 0 auto 20px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-head); font-weight: 800; font-size: 1.4rem;
+    position: relative; background: var(--bg2); border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  .step-num-inner {
+    position: absolute; inset: -2px; border-radius: 50%; z-index: -1;
+    background: var(--grad);
+  }
+  .step-num-bg { position: absolute; inset: 0; border-radius: 50%; background: var(--bg2); }
+  .step-num span { position: relative; z-index: 1; }
+  .step-icon { font-size: 1.8rem; position: relative; z-index: 1; }
+  .step-title { font-family: var(--font-head); font-weight: 700; font-size: 1.05rem; margin-bottom: 8px; }
+  .step-desc { color: var(--muted); font-size: .85rem; line-height: 1.65; }
+
+  /* ─── WHY CHOOSE US ─── */
+  .features-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  .feature-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r2); padding: 28px;
+    display: flex; gap: 20px; align-items: flex-start;
+    transition: background var(--tr), border-color var(--tr), transform var(--tr);
+  }
+  .feature-card:hover { background: var(--surface2); border-color: rgba(162,89,255,.3);
+    transform: translateY(-3px); }
+  .feat-icon {
+    width: 44px; height: 44px; flex-shrink: 0; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+    background: linear-gradient(135deg, rgba(162,89,255,.2), rgba(79,142,255,.2));
+    border: 1px solid rgba(162,89,255,.2);
+  }
+  .feat-title { font-family: var(--font-head); font-weight: 700; font-size: 1rem; margin-bottom: 6px; }
+  .feat-desc { color: var(--muted); font-size: .87rem; line-height: 1.65; }
+
+  /* ─── TESTIMONIALS ─── */
+  #testimonials { background: var(--bg2); }
+  .testi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+  .testi-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r2); padding: 30px;
+    transition: transform var(--tr), box-shadow var(--tr);
+    position: relative; overflow: hidden;
+  }
+  .testi-card::before {
+    content: '"'; position: absolute; top: -10px; right: 20px;
+    font-size: 8rem; font-family: var(--font-head); font-weight: 800;
+    color: rgba(79,142,255,.06); line-height: 1; pointer-events: none;
+  }
+  .testi-card:hover { transform: translateY(-4px); box-shadow: 0 24px 60px rgba(0,0,0,.3); }
+  .stars { color: #ffc107; font-size: 1rem; margin-bottom: 16px; letter-spacing: 2px; }
+  .testi-quote { color: var(--muted); font-size: .93rem; line-height: 1.75; margin-bottom: 24px; font-style: italic; }
+  .testi-quote strong { color: var(--text); font-style: normal; }
+  .testi-author { display: flex; align-items: center; gap: 14px; }
+  .author-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-head); font-weight: 800; font-size: 1rem; color: #fff;
+    flex-shrink: 0;
+  }
+  .av1 { background: linear-gradient(135deg, #4f8eff, #a259ff); }
+  .av2 { background: linear-gradient(135deg, #a259ff, #00e5c3); }
+  .av3 { background: linear-gradient(135deg, #00e5c3, #4f8eff); }
+  .author-name { font-family: var(--font-head); font-weight: 700; font-size: .93rem; }
+  .author-role { color: var(--muted); font-size: .8rem; }
+
+  /* ─── CTA ─── */
+  #cta {
+    background: linear-gradient(135deg, rgba(79,142,255,.08) 0%, rgba(162,89,255,.08) 100%);
+    border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  }
+  .cta-inner {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+  }
+  .contact-form {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r2); padding: 36px;
+    backdrop-filter: blur(12px);
+  }
+  .form-title { font-family: var(--font-head); font-weight: 800; font-size: 1.3rem; margin-bottom: 24px; }
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: .82rem; font-weight: 500; color: var(--muted); margin-bottom: 8px; }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%; background: rgba(255,255,255,.04); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 12px 16px; color: var(--text);
+    font-family: var(--font-body); font-size: .92rem; outline: none;
+    transition: border-color var(--tr), background var(--tr), box-shadow var(--tr);
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: var(--accent1); background: rgba(79,142,255,.06);
+    box-shadow: 0 0 0 3px rgba(79,142,255,.12);
+  }
+  .form-group select { cursor: pointer; }
+  .form-group select option { background: #0d1220; }
+  .form-group textarea { resize: vertical; min-height: 100px; }
+  .form-submit {
+    width: 100%; padding: 14px; border-radius: 99px; background: var(--grad);
+    color: #fff; font-family: var(--font-head); font-weight: 700; font-size: .95rem;
+    border: none; cursor: pointer; letter-spacing: .04em;
+    box-shadow: 0 4px 24px rgba(79,142,255,.35);
+    transition: opacity var(--tr), transform var(--tr), box-shadow var(--tr);
+    margin-top: 8px;
+  }
+  .form-submit:hover { opacity: .9; transform: translateY(-2px); box-shadow: 0 8px 36px rgba(79,142,255,.5); }
+  .form-success {
+    display: none; text-align: center; padding: 20px;
+    color: var(--accent3); font-family: var(--font-head); font-weight: 700; font-size: 1.1rem;
+  }
+  .cta-text .section-sub { margin-bottom: 36px; }
+  .cta-points { list-style: none; display: flex; flex-direction: column; gap: 16px; }
+  .cta-points li {
+    display: flex; align-items: center; gap: 14px;
+    font-size: .95rem; color: var(--muted);
+  }
+  .cta-points li .check {
+    width: 28px; height: 28px; flex-shrink: 0; border-radius: 50%;
+    background: rgba(0,229,195,.12); border: 1px solid rgba(0,229,195,.25);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent3); font-size: .85rem;
+  }
+  .cta-points li span { color: var(--text); }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: var(--bg); border-top: 1px solid var(--border);
+    padding: 60px 6% 32px; position: relative; z-index: 1;
+  }
+  .footer-grid {
+    display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 40px;
+    margin-bottom: 48px;
+  }
+  .footer-brand-desc { color: var(--muted); font-size: .88rem; margin: 14px 0 24px; line-height: 1.7; }
+  .social-links { display: flex; gap: 12px; }
+  .social-btn {
+    width: 38px; height: 38px; border-radius: 10px; background: var(--surface);
+    border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
+    color: var(--muted); text-decoration: none; font-size: 1rem;
+    transition: background var(--tr), color var(--tr), border-color var(--tr), transform var(--tr);
+  }
+  .social-btn:hover { background: var(--accent1); color: #fff; border-color: var(--accent1); transform: translateY(-2px); }
+  .footer-col-title { font-family: var(--font-head); font-weight: 700; font-size: .9rem; margin-bottom: 18px; }
+  .footer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .footer-links a { color: var(--muted); text-decoration: none; font-size: .87rem;
+    transition: color var(--tr); }
+  .footer-links a:hover { color: var(--accent1); }
+  .footer-bottom {
+    border-top: 1px solid var(--border); padding-top: 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: .82rem; color: var(--muted);
+  }
+  .footer-bottom a { color: var(--accent1); text-decoration: none; }
+
+  /* ─── MOBILE NAV ─── */
+  .mobile-menu {
+    display: none; position: fixed; inset: 0; z-index: 99;
+    background: rgba(5,8,16,.97); backdrop-filter: blur(20px);
+    flex-direction: column; align-items: center; justify-content: center; gap: 36px;
+  }
+  .mobile-menu.open { display: flex; }
+  .mobile-menu a { color: var(--text); text-decoration: none; font-family: var(--font-head);
+    font-size: 1.8rem; font-weight: 800; transition: color var(--tr); }
+  .mobile-menu a:hover { color: var(--accent1); }
+  .mobile-close { position: absolute; top: 24px; right: 6%; font-size: 2rem; cursor: pointer; color: var(--muted); }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .hero-inner { grid-template-columns: 1fr; }
+    .hero-visual { display: none; }
+    .about-grid { grid-template-columns: 1fr; }
+    .about-visual { display: none; }
+    .steps-track { grid-template-columns: 1fr 1fr; gap: 40px; }
+    .steps-track::before { display: none; }
+    .cta-inner { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+    .nav-links, .nav-cta { display: none; }
+    .hamburger { display: flex; }
+  }
+  @media (max-width: 560px) {
+    section { padding: 70px 5%; }
+    .hero-stats { flex-direction: column; }
+    .steps-track { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr; }
+    .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-logo">Apromo</div>
+  <div class="loader-bar"><div class="loader-fill"></div></div>
+</div>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <span class="mobile-close" id="menuClose">✕</span>
+  <a href="#about" onclick="closeMob()">About</a>
+  <a href="#services" onclick="closeMob()">Services</a>
+  <a href="#how" onclick="closeMob()">How It Works</a>
+  <a href="#why" onclick="closeMob()">Why Us</a>
+  <a href="#cta" onclick="closeMob()">Contact</a>
+</div>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-logo">Apromo</div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#why">Why Us</a></li>
+    <li><a href="#testimonials">Reviews</a></li>
+  </ul>
+  <a href="#cta" class="nav-cta">Book Consultation</a>
+  <div class="hamburger" id="hamburger">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-blob blob1"></div>
+  <div class="hero-blob blob2"></div>
+  <div class="hero-blob blob3"></div>
+  <div class="hero-inner max-w">
+    <div class="hero-text">
+      <div class="hero-badge"><span class="badge-dot"></span> 500+ Developers Guided This Month</div>
+      <h1 class="hero-title">Your Programming<br><span class="grad-text">Journey Starts Here</span></h1>
+      <p class="hero-sub">Expert consultation and personalized course guidance to help you navigate the world of coding — whether you're a complete beginner or leveling up your career.</p>
+      <div class="hero-actions">
+        <a href="#cta" class="btn-primary">Book a Free Consultation →</a>
+        <a href="#how" class="btn-ghost">How It Works</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="code-window">
+        <div class="code-bar">
+          <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+          <div class="code-tab">learning-path.js</div>
+        </div>
+        <div class="code-body">
+<span class="c-comment">// Your personalized roadmap 🚀</span><br>
+<span class="c-keyword">const</span> <span class="c-var">user</span> = {<br>
+&nbsp;&nbsp;<span class="c-var">goal</span>: <span class="c-str">"Full-Stack Developer"</span>,<br>
+&nbsp;&nbsp;<span class="c-var">level</span>: <span class="c-str">"Beginner"</span>,<br>
+&nbsp;&nbsp;<span class="c-var">timeline</span>: <span class="c-str">"6 months"</span><br>
+};<br><br>
+<span class="c-keyword">const</span> <span class="c-var">path</span> = <span class="c-fn">apromo</span>.<span class="c-fn">recommend</span>(<span class="c-var">user</span>);<br><br>
+<span class="c-comment">// 🎯 Recommended Path:</span><br>
+<span class="c-comment">// → HTML &amp; CSS Fundamentals</span><br>
+<span class="c-comment">// → JavaScript Essentials</span><br>
+<span class="c-comment">// → React + Node.js</span><br>
+<span class="c-comment">// → Deploy Your First App</span><br><br>
+<span class="c-fn">console</span>.<span class="c-fn">log</span>(<span class="c-str">"Roadmap Ready!"</span>);<span class="cursor"></span>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-pill"><div class="stat-num">2,400+</div><div class="stat-label">Students Guided</div></div>
+        <div class="stat-pill"><div class="stat-num">98%</div><div class="stat-label">Satisfaction Rate</div></div>
+        <div class="stat-pill"><div class="stat-num">50+</div><div class="stat-label">Expert Mentors</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="about-grid max-w reveal">
+    <div class="about-visual">
+      <div class="about-card-stack">
+        <div class="a-card">
+          <div class="a-icon">🎯</div>
+          <div class="a-card-title">Goal-Based Matching</div>
+          <div class="a-card-text">We map your goals to the exact courses you need.</div>
+        </div>
+        <div class="a-card">
+          <div class="a-icon">🧠</div>
+          <div class="a-card-title">AI-Powered Insights</div>
+          <div class="a-card-text">Smart recommendations backed by data.</div>
+        </div>
+        <div class="a-card" style="border-color:rgba(79,142,255,.3);">
+          <div class="a-icon">🚀</div>
+          <div class="a-card-title">Fast-Track Growth</div>
+          <div class="a-card-text">Learn smarter, not harder.</div>
+        </div>
+      </div>
+    </div>
+    <div class="about-text">
+      <div class="section-tag">About Apromo</div>
+      <h2 class="section-title">We Turn Confusion Into <span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Clarity</span></h2>
+      <p class="section-sub">The programming world is vast — and overwhelming. Apromo exists to be your trusted guide, helping you cut through the noise and find the learning path that actually fits your life and career goals.</p>
+      <ul class="about-list">
+        <li><span>Personalized consultation for beginners to senior engineers</span></li>
+        <li><span>Curated recommendations from 300+ verified online courses</span></li>
+        <li><span>Career-aligned roadmaps built around your timelines</span></li>
+        <li><span>Ongoing mentorship and progress check-ins</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="max-w">
+    <div class="center reveal">
+      <div class="section-tag">What We Offer</div>
+      <h2 class="section-title">Services Built for <span style="background:var(--grad2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Every Stage</span></h2>
+      <p class="section-sub">From choosing your first language to navigating a senior engineering career — we've got you covered at every step.</p>
+    </div>
+    <div class="services-grid reveal">
+      <div class="service-card">
+        <div class="svc-icon">📚</div>
+        <div class="svc-title">Course Consultation</div>
+        <div class="svc-desc">1-on-1 sessions to evaluate your current skills, goals, and budget — then handpick the best courses from top platforms like Coursera, Udemy, and Scrimba.</div>
+        <div class="svc-arrow">Explore →</div>
+      </div>
+      <div class="service-card">
+        <div class="svc-icon">💼</div>
+        <div class="svc-title">Career Guidance</div>
+        <div class="svc-desc">Not sure whether to pursue frontend, backend, data science, or DevOps? Our experts help you map market demand to your strengths and land your dream role.</div>
+        <div class="svc-arrow">Explore →</div>
+      </div>
+      <div class="service-card">
+        <div class="svc-icon">🗺️</div>
+        <div class="svc-title">Personalized Learning Paths</div>
+        <div class="svc-desc">Get a step-by-step, week-by-week curriculum designed for your schedule and learning pace — no more guessing what to study next.</div>
+        <div class="svc-arrow">Explore →</div>
+      </div>
+      <div class="service-card">
+        <div class="svc-icon">🔍</div>
+        <div class="svc-title">Tech Stack Reviews</div>
+        <div class="svc-desc">Already coding but unsure if you're using the right tools? We audit your current stack and suggest upgrades based on industry trends.</div>
+        <div class="svc-arrow">Explore →</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="max-w">
+    <div class="center reveal">
+      <div class="section-tag">The Process</div>
+      <h2 class="section-title">From Day 1 to <span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Dream Job</span></h2>
+      <p class="section-sub">A simple 4-step journey designed to get you from unsure to unstoppable.</p>
+    </div>
+    <div class="steps-track reveal">
+      <div class="step">
+        <div class="step-num">
+          <div class="step-num-inner"></div>
+          <div class="step-num-bg"></div>
+          <span class="step-icon">✦</span>
+        </div>
+        <div class="step-title">Choose</div>
+        <div class="step-desc">Tell us your goals, current skills, and how much time you have. We'll understand your unique situation.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">
+          <div class="step-num-inner"></div>
+          <div class="step-num-bg"></div>
+          <span class="step-icon">💬</span>
+        </div>
+        <div class="step-title">Consult</div>
+        <div class="step-desc">Meet with an Apromo expert 1-on-1. Get real, personalized advice — not a generic quiz result.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">
+          <div class="step-num-inner"></div>
+          <div class="step-num-bg"></div>
+          <span class="step-icon">🎓</span>
+        </div>
+        <div class="step-title">Learn</div>
+        <div class="step-desc">Follow your custom roadmap. We'll point you to the exact resources you need, nothing more, nothing less.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">
+          <div class="step-num-inner"></div>
+          <div class="step-num-bg"></div>
+          <span class="step-icon">🚀</span>
+        </div>
+        <div class="step-title">Grow</div>
+        <div class="step-desc">Land your first job, level up your salary, or launch your project. We celebrate every milestone with you.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY CHOOSE US -->
+<section id="why">
+  <div class="max-w">
+    <div class="center reveal">
+      <div class="section-tag">Why Apromo</div>
+      <h2 class="section-title">Built Different, <span style="background:var(--grad2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Designed for You</span></h2>
+      <p class="section-sub">What sets us apart from a Google search or a random Reddit thread.</p>
+    </div>
+    <div class="features-grid reveal">
+      <div class="feature-card">
+        <div class="feat-icon">🧑‍💻</div>
+        <div><div class="feat-title">Industry Expert Mentors</div><div class="feat-desc">Our consultants are active engineers at top tech companies — not just coaches. Real-world experience, real advice.</div></div>
+      </div>
+      <div class="feature-card">
+        <div class="feat-icon">🎯</div>
+        <div><div class="feat-title">Hyper-Personalized</div><div class="feat-desc">No two people get the same plan. We factor in your learning style, schedule, budget, and end goal.</div></div>
+      </div>
+      <div class="feature-card">
+        <div class="feat-icon">📡</div>
+        <div><div class="feat-title">Always Up-to-Date</div><div class="feat-desc">Tech moves fast. Our course database is refreshed weekly, so you're always learning what's relevant now.</div></div>
+      </div>
+      <div class="feature-card">
+        <div class="feat-icon">💰</div>
+        <div><div class="feat-title">Cost-Effective</div><div class="feat-desc">Stop wasting money on courses you'll never finish. We ensure every rupee you spend on learning counts.</div></div>
+      </div>
+      <div class="feature-card">
+        <div class="feat-icon">🤝</div>
+        <div><div class="feat-title">Ongoing Support</div><div class="feat-desc">We're not gone after the first call. Get check-ins, re-routing if needed, and a community to keep you motivated.</div></div>
+      </div>
+      <div class="feature-card">
+        <div class="feat-icon">⚡</div>
+        <div><div class="feat-title">Fast Turnaround</div><div class="feat-desc">Book a session today, get your personalized roadmap within 24 hours. No long waiting lists.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="max-w">
+    <div class="center reveal">
+      <div class="section-tag">Testimonials</div>
+      <h2 class="section-title">Developers Who <span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Made It</span></h2>
+      <p class="section-sub">Real stories from real people who found their path with Apromo.</p>
+    </div>
+    <div class="testi-grid reveal">
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <div class="testi-quote">I spent 6 months buying random Udemy courses going nowhere. After one session with Apromo, I had a <strong>clear 4-month plan</strong> and landed my first dev job right on schedule. Honestly life-changing.</div>
+        <div class="testi-author">
+          <div class="author-avatar av1">RK</div>
+          <div><div class="author-name">Rishi Kapoor</div><div class="author-role">Frontend Dev @ Razorpay</div></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <div class="testi-quote">As someone switching from a non-tech background, I was completely overwhelmed. Apromo broke it all down, <strong>matched me with the perfect resources</strong>, and the mentor check-ins kept me accountable every week.</div>
+        <div class="testi-author">
+          <div class="author-avatar av2">PS</div>
+          <div><div class="author-name">Priya Sharma</div><div class="author-role">Data Analyst @ Flipkart</div></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <div class="testi-quote">I was already working as a developer but wanted to move into <strong>system design and senior roles</strong>. Apromo gave me exactly the gap analysis and advanced roadmap I needed. Promotion secured in 5 months.</div>
+        <div class="testi-author">
+          <div class="author-avatar av3">AM</div>
+          <div><div class="author-name">Arjun Mehta</div><div class="author-role">Senior Engineer @ Atlassian</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA / CONTACT -->
+<section id="cta">
+  <div class="cta-inner max-w reveal">
+    <div class="cta-text">
+      <div class="section-tag">Get Started</div>
+      <h2 class="section-title">Ready to Build Something <span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Amazing?</span></h2>
+      <p class="section-sub">Book your free 30-minute consultation and walk away with clarity, direction, and a plan you can start tomorrow.</p>
+      <ul class="cta-points">
+        <li><div class="check">✓</div><span>Free first consultation — no credit card needed</span></li>
+        <li><div class="check">✓</div><span>Personalized roadmap delivered within 24 hours</span></li>
+        <li><div class="check">✓</div><span>Speak with a working engineer, not a salesperson</span></li>
+        <li><div class="check">✓</div><span>100% satisfaction guarantee on all paid plans</span></li>
+      </ul>
+    </div>
+    <div class="contact-form">
+      <div class="form-title">Book Your Free Session</div>
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" placeholder="Rishi Kapoor">
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" placeholder="you@email.com">
+      </div>
+      <div class="form-group">
+        <label>Your Goal</label>
+        <select>
+          <option value="">Select your primary goal...</option>
+          <option>Get my first developer job</option>
+          <option>Switch into tech from another field</option>
+          <option>Level up to senior/staff roles</option>
+          <option>Build a specific project or product</option>
+          <option>Just exploring — not sure yet</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Anything else? (optional)</label>
+        <textarea placeholder="Tell us a bit about yourself and what you're hoping to achieve..."></textarea>
+      </div>
+      <button class="form-submit" id="submitBtn">Book Free Consultation →</button>
+      <div class="form-success" id="formSuccess">🎉 Request sent! We'll reach out within 2 hours.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="max-w">
+    <div class="footer-grid">
+      <div>
+        <div class="nav-logo" style="font-size:1.6rem;">Apromo</div>
+        <p class="footer-brand-desc">Expert programming consultation and personalized learning paths to accelerate your tech career — wherever you're starting from.</p>
+        <div class="social-links">
+          <a class="social-btn" href="#" aria-label="Twitter">𝕏</a>
+          <a class="social-btn" href="#" aria-label="LinkedIn">in</a>
+          <a class="social-btn" href="#" aria-label="GitHub">⌥</a>
+          <a class="social-btn" href="#" aria-label="YouTube">▶</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Services</div>
+        <ul class="footer-links">
+          <li><a href="#">Course Consultation</a></li>
+          <li><a href="#">Career Guidance</a></li>
+          <li><a href="#">Learning Paths</a></li>
+          <li><a href="#">Tech Stack Review</a></li>
+          <li><a href="#">Group Sessions</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Resources</div>
+        <ul class="footer-links">
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Developer Roadmaps</a></li>
+          <li><a href="#">Course Reviews</a></li>
+          <li><a href="#">Free Tools</a></li>
+          <li><a href="#">Community</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Company</div>
+        <ul class="footer-links">
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Our Mentors</a></li>
+          <li><a href="#">Pricing</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Service</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 Apromo. All rights reserved.</span>
+      <span>Made with ♥ for developers everywhere</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // LOADER
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.getElementById('loader').classList.add('done');
+    }, 1600);
+  });
+
+  // NAV SCROLL
+  const navEl = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    navEl.classList.toggle('scrolled', window.scrollY > 60);
+  });
+
+  // HAMBURGER
+  document.getElementById('hamburger').addEventListener('click', () => {
+    document.getElementById('mobileMenu').classList.add('open');
+  });
+  document.getElementById('menuClose').addEventListener('click', closeMob);
+  function closeMob() { document.getElementById('mobileMenu').classList.remove('open'); }
+
+  // SCROLL REVEAL
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  reveals.forEach(r => observer.observe(r));
+
+  // STAGGER child cards/steps inside reveals
+  const staggerParents = document.querySelectorAll('.services-grid, .features-grid, .testi-grid, .steps-track');
+  staggerParents.forEach(parent => {
+    [...parent.children].forEach((child, i) => {
+      child.style.transitionDelay = (i * 80) + 'ms';
+    });
+  });
+
+  // PARALLAX BLOBS
+  window.addEventListener('mousemove', (e) => {
+    const x = (e.clientX / window.innerWidth - 0.5) * 20;
+    const y = (e.clientY / window.innerHeight - 0.5) * 20;
+    document.querySelector('.blob1').style.transform = `translate(${x * 0.6}px, ${y * 0.6}px)`;
+    document.querySelector('.blob2').style.transform = `translate(${-x * 0.4}px, ${-y * 0.4}px)`;
+    document.querySelector('.blob3').style.transform = `translate(${x * 0.8}px, ${y * 0.8}px)`;
+  });
+
+  // FORM SUBMIT
+  document.getElementById('submitBtn').addEventListener('click', function() {
+    const inputs = document.querySelectorAll('.contact-form input, .contact-form select');
+    let valid = true;
+    inputs.forEach(i => { if (!i.value.trim()) { i.style.borderColor = 'rgba(255,80,80,.5)'; valid = false; }
+      else i.style.borderColor = ''; });
+    if (!valid) return;
+    this.textContent = 'Sending...';
+    this.disabled = true;
+    setTimeout(() => {
+      this.style.display = 'none';
+      document.getElementById('formSuccess').style.display = 'block';
+    }, 1200);
+  });
+
+  // TYPED TEXT EFFECT FOR HERO
+  const lines = [
+    ['<span class="c-comment">// Your personalized roadmap 🚀</span>'],
+  ];
+</script>
+</body>
+</html>
